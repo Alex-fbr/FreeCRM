@@ -1,49 +1,53 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using System;
+using Serilog;
+using Serilog.Aspnetcore.Middleware;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
+using WebAPI.Common;
 
 namespace WebAPI
 {
     public class Startup
     {
+        private readonly IEnumerable<CustomAttributeData> _assemblyAttributes;
+
+
+        public IConfiguration Configuration { get; }
+        public bool SwaggerOn => Configuration?.GetValue(nameof(SwaggerOn), false) ?? false;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _assemblyAttributes = Assembly.GetExecutingAssembly()?.CustomAttributes;
         }
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.ConfigureSwagger(SwaggerOn, _assemblyAttributes);
+            services.ConfigureLogger(Configuration);
+            services.ConfigureCors(Configuration);
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPI", Version = "v1" });
-            });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
+                app.UseHttpContextLogger();
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebAPI v1"));
             }
 
+            if (SwaggerOn)
+            {
+                app.UseOpenApi();
+                app.UseSwaggerUi3();
+            }
+
+            app.UseSerilogRequestLogging();
             app.UseHttpsRedirection();
 
             app.UseRouting();
