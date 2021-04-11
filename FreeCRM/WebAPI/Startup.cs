@@ -8,6 +8,7 @@ using Serilog.Aspnetcore.Middleware;
 using System.Collections.Generic;
 using System.Reflection;
 using WebAPI.Common;
+using WebAPI.FilterAttributes;
 
 namespace WebAPI
 {
@@ -31,6 +32,14 @@ namespace WebAPI
             services.ConfigureLogger(Configuration);
             services.ConfigureCors(Configuration);
             services.AddControllers();
+
+            services.AddScoped<ProfilerAttribute>();
+            services.AddScoped<ExceptionHandlerAttribute>();
+            services.AddMvc().AddMvcOptions(options =>
+            {
+                options.Filters.AddService<ProfilerAttribute>();
+                options.Filters.AddService<ExceptionHandlerAttribute>();
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -58,8 +67,9 @@ namespace WebAPI
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                 endpoints.MapControllers();
             });
+
         }
     }
 }
