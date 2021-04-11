@@ -47,6 +47,8 @@ namespace WebAPI
                 app.UseSwaggerUi3();
             }
 
+            app.UseCors(); // required before UseMVC!!!
+
             app.UseSerilogRequestLogging();
             app.UseHttpsRedirection();
 
