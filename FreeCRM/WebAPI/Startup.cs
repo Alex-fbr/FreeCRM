@@ -16,7 +16,6 @@ namespace WebAPI
     {
         private readonly IEnumerable<CustomAttributeData> _assemblyAttributes;
 
-
         public IConfiguration Configuration { get; }
         public bool SwaggerOn => Configuration?.GetValue(nameof(SwaggerOn), false) ?? false;
 
