@@ -27,7 +27,10 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "free-crm", "WebApp\free-crm
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "57363"
+		SlnRelativePath = "WebApp\free-crm\"
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBot", "TelegramBot\TelegramBot.csproj", "{6BE64821-31E2-40A9-B57D-39F313EF4A22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +46,10 @@ Global
 		{EA13F6FC-5599-4CE6-A8F7-32CF5A558FAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA13F6FC-5599-4CE6-A8F7-32CF5A558FAF}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{EA13F6FC-5599-4CE6-A8F7-32CF5A558FAF}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{6BE64821-31E2-40A9-B57D-39F313EF4A22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BE64821-31E2-40A9-B57D-39F313EF4A22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BE64821-31E2-40A9-B57D-39F313EF4A22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BE64821-31E2-40A9-B57D-39F313EF4A22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
