@@ -1,3 +1,4 @@
+using Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,7 +8,6 @@ using Serilog;
 using Serilog.Aspnetcore.Middleware;
 using System.Collections.Generic;
 using System.Reflection;
-using WebAPI.Common;
 using WebAPI.FilterAttributes;
 
 namespace WebAPI

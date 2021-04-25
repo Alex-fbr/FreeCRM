@@ -1164,6 +1164,27 @@
         "runtime": {
           "lib/netstandard2.1/YamlDotNet.dll": {}
         }
+      },
+      "Common/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "5.0.0",
+          "Microsoft.Extensions.Logging.Configuration": "5.0.0",
+          "Microsoft.Extensions.Logging.Console": "5.0.0",
+          "Microsoft.Extensions.Logging.Debug": "5.0.0",
+          "NSwag.AspNetCore": "13.10.9",
+          "Serilog.AspNetCore": "4.1.0",
+          "Serilog.Aspnetcore.Middleware": "1.0.0",
+          "Serilog.Extensions.Logging.File": "2.0.0",
+          "Serilog.Formatting.Compact": "1.1.0"
+        },
+        "compile": {
+          "bin/placeholder/Common.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Common.dll": {}
+        }
       }
     }
   },
@@ -4135,10 +4156,16 @@
         "yamldotnet.9.1.4.nupkg.sha512",
         "yamldotnet.nuspec"
       ]
+    },
+    "Common/1.0.0": {
+      "type": "project",
+      "path": "../Common/Common.csproj",
+      "msbuildProject": "../Common/Common.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net5.0": [
+      "Common >= 1.0.0",
       "Microsoft.Extensions.Logging >= 5.0.0",
       "Microsoft.Extensions.Logging.Configuration >= 5.0.0",
       "Microsoft.Extensions.Logging.Console >= 5.0.0",
@@ -4182,7 +4209,11 @@
       "frameworks": {
         "net5.0": {
           "targetAlias": "net5.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Github\\FreeCRM\\FreeCRM\\Common\\Common.csproj": {
+              "projectPath": "D:\\Github\\FreeCRM\\FreeCRM\\Common\\Common.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
