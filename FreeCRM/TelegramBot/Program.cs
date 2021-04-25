@@ -1,7 +1,10 @@
+using Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using Telegram.Bot;
+using TelegramBot.Configurations;
 
 namespace TelegramBot
 {
@@ -16,15 +19,22 @@ namespace TelegramBot
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    var Configuration = hostContext.Configuration;
+                    services.ConfigureLogger(Configuration);
+
                     services.AddSingleton<ITelegramBotClient>(sc =>
                     {
-                        var configuration = hostContext.Configuration;
                         var botConfig = new BotConfig();
-                        configuration.GetSection(nameof(BotConfig)).Bind(botConfig);
+                        Configuration.GetSection(nameof(BotConfig)).Bind(botConfig);
+
                         return new TelegramBotClient(botConfig.Token);
                     });
 
+                    //   services.AddScoped<IUpdateHandlerService, UpdateHandlerService>();
+
                     services.AddHostedService<TelegramBotWorker>();
-                });
+                })
+                .UseSerilog();
+
     }
 }

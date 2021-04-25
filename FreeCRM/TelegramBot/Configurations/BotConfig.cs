@@ -1,4 +1,4 @@
-﻿namespace TelegramBot
+﻿namespace TelegramBot.Configurations
 {
     public class BotConfig
     {

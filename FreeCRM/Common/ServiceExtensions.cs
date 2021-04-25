@@ -7,9 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace WebAPI.Common
+namespace Common
 {
-
     public static class ServiceExtensions
     {
         public static string AttributeReader<TAttr>(IEnumerable<CustomAttributeData> attributes)
