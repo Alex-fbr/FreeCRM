@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandsSettingsXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <BotCommandList>
+    <BotCommandXml Type="InlineKeyboard" Code="/inline" Description="пришлет список команд">
+      <KeyboardButtonList>
+        <KeyboardItem>
+          <Keyboard>
+            <DisplayToUser>Прислать кнопки</DisplayToUser>
+            <CallbackData>/keyboard</CallbackData>
+          </Keyboard>
+          <Keyboard>
+            <DisplayToUser>Прислать фото разработчика</DisplayToUser>
+            <CallbackData>/developerPhoto</CallbackData>
+          </Keyboard>
+          <Keyboard>
+            <DisplayToUser>Запросить контактные данные</DisplayToUser>
+            <CallbackData>/request</CallbackData>
+          </Keyboard>
+        </KeyboardItem>
+      </KeyboardButtonList>
+    </BotCommandXml>
+    <BotCommandXml Type="ReplyKeyboard" Code="/keyboard" Description="пришлет кнопки">
+      <KeyboardButtonList>
+        <KeyboardItem>
+          <Keyboard>
+            <DisplayToUser>Акции</DisplayToUser>
+          </Keyboard>
+          <Keyboard>
+            <DisplayToUser>Облигации</DisplayToUser>
+          </Keyboard>
+          <Keyboard>
+            <DisplayToUser>Фонды</DisplayToUser>
+          </Keyboard>
+        </KeyboardItem>
+      </KeyboardButtonList>
+    </BotCommandXml>
+    <BotCommandXml Type="GetPhoto" Code="/developerPhoto" Description="отправит фото разработчика бота" />
+    <BotCommandXml Type="Request" Code="/request" Description="пришлет запрос контактов" />
+  </BotCommandList>
+</CommandsSettingsXml>

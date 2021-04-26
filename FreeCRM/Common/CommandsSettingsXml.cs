@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace Common
@@ -12,27 +13,39 @@ namespace Common
     {
         [XmlArray]
         [XmlArrayItem(typeof(BotCommandXml), ElementName = nameof(BotCommandXml))]
-        public BotCommandXml[] BotCommandList { get; set; }
-
-        //[XmlElement]
-        //public CommonRequestSupervisingSettings CommonRequestSupervisingSettings { get; set; }
-
-        //[XmlAttribute]
-        //public string TimeOffsetSettingsName { get; set; } = "TimeOffset";
-
-        //[XmlElement]
-        //public TimeOffsetType DefaultTimeOffsetManager { get; set; } = TimeOffsetType.Workplace;
-
-        //[XmlElement]
-        //public string PersonalizationSettingsName { get; set; }
+        public List<BotCommandXml> BotCommandList { get; set; }
 
         public CommandsSettingsXml()
         {
+            BotCommandList = new List<BotCommandXml>();
         }
 
+        [Serializable]
         public class BotCommandXml
         {
+            [XmlAttribute]
+            public CommandType Type { get; set; }
 
+            [XmlAttribute]
+            public string Code { get; set; }
+
+            [XmlAttribute]
+            public string Description { get; set; }
+
+            [XmlArray]
+            [XmlArrayItem(typeof(List<Keyboard>), ElementName = "KeyboardItem")]
+            public List<List<Keyboard>> KeyboardButtonList { get; set; }
+        }
+
+
+        [Serializable]
+        public class Keyboard
+        {
+            [XmlElement]
+            public string DisplayToUser { get; set; }
+
+            [XmlElement]
+            public string CallbackData { get; set; }
         }
     }
 }

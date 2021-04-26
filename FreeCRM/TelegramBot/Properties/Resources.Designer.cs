@@ -61,6 +61,15 @@ namespace TelegramBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Выберите один из вариантов.
+        /// </summary>
+        public static string Choose {
+            get {
+                return ResourceManager.GetString("Choose", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /inline.
         /// </summary>
         public static string Inline {

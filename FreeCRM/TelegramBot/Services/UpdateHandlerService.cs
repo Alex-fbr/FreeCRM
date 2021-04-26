@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Common;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -9,6 +12,7 @@ using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Interfaces;
+using static Common.CommandsSettingsXml;
 
 namespace TelegramBot.Services
 {
@@ -16,25 +20,40 @@ namespace TelegramBot.Services
     {
         private readonly ILogger _logger;
         private readonly ITelegramBotClient _botClient;
+        private readonly CommandsSettingsXml _settings;
 
         public UpdateHandlerService(ILogger logger, ITelegramBotClient telegramBotClient)
         {
             _logger = logger;
             _botClient = telegramBotClient;
+
+            var XMLFileName = "D:\\Github\\FreeCRM\\FreeCRM\\WebAPI\\settings.xml";
+
+            if (System.IO.File.Exists(XMLFileName))
+            {
+                var ser = new XmlSerializer(typeof(CommandsSettingsXml));
+                using var reader = new StreamReader(XMLFileName);
+                _settings = ser.Deserialize(reader) as CommandsSettingsXml;
+                reader.Close();
+            }
         }
 
         public Task GetHandler(Update update) => update.Type switch
         {
             UpdateType.Message => BotOnMessageReceived(update.Message),
             UpdateType.EditedMessage => BotOnMessageReceived(update.Message),
+
             UpdateType.CallbackQuery => BotOnCallbackQueryReceived(update.CallbackQuery),
+
+
+
             UpdateType.InlineQuery => BotOnInlineQueryReceived(update.InlineQuery),
             UpdateType.ChosenInlineResult => BotOnChosenInlineResultReceived(update.ChosenInlineResult),
             UpdateType.ChannelPost => Task.Run(() => _logger.LogDebug("ChannelPost")),
             UpdateType.EditedChannelPost => Task.Run(() => _logger.LogDebug("ChannelPost")),
             UpdateType.ShippingQuery => Task.Run(() => _logger.LogDebug("ChannelPost")),
             UpdateType.PreCheckoutQuery => Task.Run(() => _logger.LogDebug("ChannelPost")),
-            UpdateType.Poll => Task.Run(() => _logger.LogDebug("ChannelPost")),
+            UpdateType.Poll => Task.Run(() => _logger.LogDebug("ChannelPost")),  // Poll - опрос 
             UpdateType.PollAnswer => Task.Run(() => _logger.LogDebug("ChannelPost")),
             _ => UnknownUpdateHandlerAsync(update)
         };
@@ -44,56 +63,78 @@ namespace TelegramBot.Services
             _logger.LogDebug($"Receive message type: {message.Type}");
 
             if (message.Type != MessageType.Text)
-                return;
-
-            var action = (message.Text.Split(' ').First()) switch
             {
-                "/inline" => SendInlineKeyboard(message),
-                "/keyboard" => SendReplyKeyboard(message),
-                "/developerPhoto" => SendFile(message),
-                "/request" => RequestContactAndLocation(message),
-                _ => Usage(message)
-            };
+                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Извините, я вас не понял", replyMarkup: new ReplyKeyboardRemove());
+                await Usage(message);
+                return;
+            }
+
+            var code = message.Text.Split(' ').First();
+            var botCommand = _settings.BotCommandList.FirstOrDefault(x => x.Code == code);
+
+            Task action;
+
+            if (botCommand != null)
+            {
+                action = botCommand.Type switch
+                {
+                    CommandType.InlineKeyboard => SendInlineKeyboard(message, botCommand.KeyboardButtonList),
+                    CommandType.ReplyKeyboard => SendReplyKeyboard(message, botCommand.KeyboardButtonList),
+                    CommandType.GetPhoto => SendFile(message),
+                    CommandType.Request => RequestContactAndLocation(message),
+                    _ => Usage(message)
+                };
+            }
+            else
+            {
+                action = Usage(message);
+            }
+
+            //var action = text switch
+            //{
+            //    "/inline" => SendInlineKeyboard(message),
+            //    "/keyboard" => SendReplyKeyboard(message),
+            //    "/developerPhoto" => SendFile(message),
+            //    "/request" => RequestContactAndLocation(message),
+            //    _ => Usage(message)
+            //};
 
             await action;
 
             // Send inline keyboard
             // You can process responses in BotOnCallbackQueryReceived handler
-            async Task SendInlineKeyboard(Message message)
+            async Task SendInlineKeyboard(Message message, List<List<Keyboard>> inlineKeyboards)
             {
                 await _botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
 
-                var inlineKeyboard = new InlineKeyboardMarkup(new[]
-                {
-                    // first row
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("1.1", "11"),
-                        InlineKeyboardButton.WithCallbackData("1.2", "12"),
-                    },
-                    // second row
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("2.1", "21"),
-                        InlineKeyboardButton.WithCallbackData("2.2", "22"),
-                    }
-                });
+                var inlineKeyboard = new List<List<InlineKeyboardButton>>();
 
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Choose", replyMarkup: inlineKeyboard);
+                foreach (var (inlineKeyboardRow, list) in from inlineKeyboardRow in inlineKeyboards
+                                                          let list = new List<InlineKeyboardButton>()
+                                                          select (inlineKeyboardRow, list))
+                {
+                    list.AddRange(inlineKeyboardRow.Select(ik => InlineKeyboardButton.WithCallbackData(ik.DisplayToUser, ik.CallbackData)));
+                    inlineKeyboard.Add(list);
+                }
+
+                var replyMarkup = new InlineKeyboardMarkup(inlineKeyboard);
+                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.Choose, replyMarkup: replyMarkup);
             }
 
-            async Task SendReplyKeyboard(Message message)
+            async Task SendReplyKeyboard(Message message, List<List<Keyboard>> keyboards)
             {
-                var replyKeyboardMarkup = new ReplyKeyboardMarkup(
-                    new KeyboardButton[][]
-                    {
-                        new KeyboardButton[] { "1.1", "1.2" },
-                        new KeyboardButton[] { "2.1", "2.2" },
-                    },
-                    resizeKeyboard: true
-                );
+                var replyKeyboard = new List<List<KeyboardButton>>();
 
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Choose", replyMarkup: replyKeyboardMarkup);
+                foreach (var (inlineKeyboardRow, list) in from replyKeyboardRow in keyboards
+                                                          let list = new List<KeyboardButton>()
+                                                          select (replyKeyboardRow, list))
+                {
+                    list.AddRange(inlineKeyboardRow.Select(ik => new KeyboardButton(ik.DisplayToUser)));
+                    replyKeyboard.Add(list);
+                }
+
+                var replyKeyboardMarkup = new ReplyKeyboardMarkup(replyKeyboard, resizeKeyboard: true);
+                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.Choose, replyMarkup: replyKeyboardMarkup);
             }
 
             async Task SendFile(Message message)
@@ -111,20 +152,25 @@ namespace TelegramBot.Services
             {
                 var RequestReplyKeyboard = new ReplyKeyboardMarkup(new[]
                 {
-                    KeyboardButton.WithRequestLocation("Location"),
-                    KeyboardButton.WithRequestContact("Contact"),
+                    KeyboardButton.WithRequestLocation("Отправить свою локацию"),
+                    KeyboardButton.WithRequestContact("Отправить свой контакт"),
                 });
 
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Who or Where are you?", replyMarkup: RequestReplyKeyboard);
+                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Оставьте свои данные", replyMarkup: RequestReplyKeyboard);
             }
 
             async Task Usage(Message message)
             {
-                const string usage = "Вот, что я могу:\n" +
-                                        "/inline   - send inline keyboard\n" +
-                                        "/keyboard - send custom keyboard\n" +
-                                        "/developerPhoto    - send a photo\n" +
-                                        "/request  - request location or contact";
+                var usage = "Вот, что я могу:";
+
+                foreach (var bc in _settings.BotCommandList)
+                {
+                    usage = $"{usage} \n {bc.Code} - {bc.Description}";
+                }
+
+                //"/keyboard - send custom keyboard\n" +
+                //"/developerPhoto    - send a photo\n" +
+                //"/request  - request location or contact";
 
                 await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: usage, replyMarkup: new ReplyKeyboardRemove());
             }
@@ -135,6 +181,10 @@ namespace TelegramBot.Services
         {
             await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
             await _botClient.SendTextMessageAsync(callbackQuery.Message.Chat.Id, $"Вы ответили '{callbackQuery.Data}'");
+
+            var mes = callbackQuery.Message;
+            mes.Text = callbackQuery.Data;
+            await BotOnMessageReceived(mes);
         }
 
         #region Inline Mode
