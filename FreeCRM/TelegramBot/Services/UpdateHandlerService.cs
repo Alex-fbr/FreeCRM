@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Telegram.Bot;
@@ -166,11 +167,8 @@ namespace TelegramBot.Services
                 foreach (var bc in _settings.BotCommandList)
                 {
                     usage = $"{usage} \n {bc.Code} - {bc.Description}";
+                    break;
                 }
-
-                //"/keyboard - send custom keyboard\n" +
-                //"/developerPhoto    - send a photo\n" +
-                //"/request  - request location or contact";
 
                 await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: usage, replyMarkup: new ReplyKeyboardRemove());
             }
@@ -180,7 +178,9 @@ namespace TelegramBot.Services
         private async Task BotOnCallbackQueryReceived(CallbackQuery callbackQuery)
         {
             await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-            await _botClient.SendTextMessageAsync(callbackQuery.Message.Chat.Id, $"Вы ответили '{callbackQuery.Data}'");
+            await _botClient.SendChatActionAsync(callbackQuery.Message.Chat.Id, ChatAction.Typing);
+
+            //  await _botClient.SendTextMessageAsync(callbackQuery.Message.Chat.Id, $"Вы ответили '{callbackQuery.Data}'");
 
             var mes = callbackQuery.Message;
             mes.Text = callbackQuery.Data;
