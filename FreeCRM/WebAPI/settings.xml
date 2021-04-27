@@ -8,10 +8,14 @@
             <DisplayToUser>Прислать кнопки</DisplayToUser>
             <CallbackData>/keyboard</CallbackData>
           </Keyboard>
+        </KeyboardItem>
+        <KeyboardItem>
           <Keyboard>
             <DisplayToUser>Прислать фото разработчика</DisplayToUser>
             <CallbackData>/developerPhoto</CallbackData>
           </Keyboard>
+        </KeyboardItem>
+        <KeyboardItem>
           <Keyboard>
             <DisplayToUser>Запросить контактные данные</DisplayToUser>
             <CallbackData>/request</CallbackData>

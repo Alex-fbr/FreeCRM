@@ -61,9 +61,15 @@ namespace WebAPI.Controllers
                     new  List<Keyboard>()
                     {
                         new Keyboard(){ DisplayToUser = "Прислать кнопки", CallbackData = "/keyboard"},
+                    },
+                    new  List<Keyboard>()
+                    {
                         new Keyboard(){ DisplayToUser = "Прислать фото разработчика", CallbackData = "/developerPhoto"},
+                    },
+                    new  List<Keyboard>()
+                    {
                         new Keyboard(){ DisplayToUser = "Запросить контактные данные", CallbackData = "/request"},
-                    }
+                    },
                 },
             });
 
