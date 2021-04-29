@@ -120,6 +120,9 @@
   <data name="Choose" xml:space="preserve">
     <value>Выберите один из вариантов</value>
   </data>
+  <data name="DoNotUnderstand" xml:space="preserve">
+    <value>Извините, я вас не понял</value>
+  </data>
   <data name="Inline" xml:space="preserve">
     <value>/inline</value>
   </data>

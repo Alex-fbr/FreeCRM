@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -55,6 +56,7 @@ namespace TelegramBot
                 {
                     try
                     {
+                        _logger.LogDebug(JsonSerializer.Serialize(update));
                         await _updateHandlerService.GetHandler(update);
                     }
                     catch (Exception exception)

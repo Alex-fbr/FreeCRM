@@ -1,9 +1,9 @@
 ﻿using Common;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Telegram.Bot;
@@ -28,7 +28,7 @@ namespace TelegramBot.Services
             _logger = logger;
             _botClient = telegramBotClient;
 
-            var XMLFileName = "D:\\Github\\FreeCRM\\FreeCRM\\WebAPI\\settings.xml";
+            var XMLFileName = $"{Environment.CurrentDirectory}\\settings.xml";
 
             if (System.IO.File.Exists(XMLFileName))
             {
@@ -43,19 +43,16 @@ namespace TelegramBot.Services
         {
             UpdateType.Message => BotOnMessageReceived(update.Message),
             UpdateType.EditedMessage => BotOnMessageReceived(update.Message),
-
             UpdateType.CallbackQuery => BotOnCallbackQueryReceived(update.CallbackQuery),
-
-
 
             UpdateType.InlineQuery => BotOnInlineQueryReceived(update.InlineQuery),
             UpdateType.ChosenInlineResult => BotOnChosenInlineResultReceived(update.ChosenInlineResult),
             UpdateType.ChannelPost => Task.Run(() => _logger.LogDebug("ChannelPost")),
-            UpdateType.EditedChannelPost => Task.Run(() => _logger.LogDebug("ChannelPost")),
-            UpdateType.ShippingQuery => Task.Run(() => _logger.LogDebug("ChannelPost")),
-            UpdateType.PreCheckoutQuery => Task.Run(() => _logger.LogDebug("ChannelPost")),
-            UpdateType.Poll => Task.Run(() => _logger.LogDebug("ChannelPost")),  // Poll - опрос 
-            UpdateType.PollAnswer => Task.Run(() => _logger.LogDebug("ChannelPost")),
+            UpdateType.EditedChannelPost => Task.Run(() => _logger.LogDebug("EditedChannelPost")),
+            UpdateType.ShippingQuery => Task.Run(() => _logger.LogDebug("ShippingQuery")),
+            UpdateType.PreCheckoutQuery => Task.Run(() => _logger.LogDebug("PreCheckoutQuery")),
+            UpdateType.Poll => Task.Run(() => _logger.LogDebug("Poll")),  // Poll - опрос 
+            UpdateType.PollAnswer => Task.Run(() => _logger.LogDebug("PollAnswer")),
             _ => UnknownUpdateHandlerAsync(update)
         };
 
@@ -65,7 +62,7 @@ namespace TelegramBot.Services
 
             if (message.Type != MessageType.Text)
             {
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Извините, я вас не понял", replyMarkup: new ReplyKeyboardRemove());
+                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.DoNotUnderstand, replyMarkup: new ReplyKeyboardRemove());
                 await Usage(message);
                 return;
             }
@@ -91,19 +88,9 @@ namespace TelegramBot.Services
                 action = Usage(message);
             }
 
-            //var action = text switch
-            //{
-            //    "/inline" => SendInlineKeyboard(message),
-            //    "/keyboard" => SendReplyKeyboard(message),
-            //    "/developerPhoto" => SendFile(message),
-            //    "/request" => RequestContactAndLocation(message),
-            //    _ => Usage(message)
-            //};
-
             await action;
 
             // Send inline keyboard
-            // You can process responses in BotOnCallbackQueryReceived handler
             async Task SendInlineKeyboard(Message message, List<List<Keyboard>> inlineKeyboards)
             {
                 await _botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);

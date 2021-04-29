@@ -1,7 +1,6 @@
 ﻿using Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -16,6 +15,7 @@ namespace WebAPI.Controllers
     [ApiController]
     public class SettingsController : ControllerBase
     {
+        private const string filePath = @"D:\Github\FreeCRM\FreeCRM\TelegramBot\settings.xml";
         private readonly ILogger<SettingsController> _logger;
 
         public SettingsController(ILogger<SettingsController> logger)
@@ -29,12 +29,10 @@ namespace WebAPI.Controllers
         [HttpGet()]
         public async Task<ActionResult> GetOk()
         {
-            var XMLFileName = Environment.CurrentDirectory + "\\settings.xml";
-
-            if (System.IO.File.Exists(XMLFileName))
+            if (System.IO.File.Exists(filePath))
             {
                 var ser = new XmlSerializer(typeof(CommandsSettingsXml));
-                using var reader = new StreamReader(XMLFileName);
+                using var reader = new StreamReader(filePath);
                 var settings = ser.Deserialize(reader) as CommandsSettingsXml;
                 reader.Close();
                 return StatusCode((int)HttpStatusCode.OK, settings);
@@ -104,9 +102,8 @@ namespace WebAPI.Controllers
                 Description = "пришлет запрос контактов",
             });
 
-            var XMLFileName = Environment.CurrentDirectory + "\\settings.xml";
             var ser = new XmlSerializer(typeof(CommandsSettingsXml));
-            using var writer = new StreamWriter(XMLFileName);
+            using var writer = new StreamWriter(filePath);
             ser.Serialize(writer, Fields);
             writer.Close();
 

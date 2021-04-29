@@ -26,11 +26,8 @@ namespace TelegramBot
                     {
                         var botConfig = new BotConfig();
                         Configuration.GetSection(nameof(BotConfig)).Bind(botConfig);
-
                         return new TelegramBotClient(botConfig.Token);
                     });
-
-                    //   services.AddScoped<IUpdateHandlerService, UpdateHandlerService>();
 
                     services.AddHostedService<TelegramBotWorker>();
                 })

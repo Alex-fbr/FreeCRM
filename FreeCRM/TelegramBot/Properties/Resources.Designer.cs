@@ -70,6 +70,15 @@ namespace TelegramBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Извините, я вас не понял.
+        /// </summary>
+        public static string DoNotUnderstand {
+            get {
+                return ResourceManager.GetString("DoNotUnderstand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /inline.
         /// </summary>
         public static string Inline {
