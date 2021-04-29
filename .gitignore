@@ -338,6 +338,4 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-
-*.appsettings.Development
-*.appsettings.Development
+/FreeCRM/TelegramBot/appsettings.Development.json
