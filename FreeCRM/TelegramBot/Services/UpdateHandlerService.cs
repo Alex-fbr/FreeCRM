@@ -89,76 +89,76 @@ namespace TelegramBot.Services
             }
 
             await action;
+        }
 
-            // Send inline keyboard
-            async Task SendInlineKeyboard(Message message, List<List<Keyboard>> inlineKeyboards)
+        // Send inline keyboard
+        async Task SendInlineKeyboard(Message message, List<List<Keyboard>> inlineKeyboards)
+        {
+            await _botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
+
+            var inlineKeyboard = new List<List<InlineKeyboardButton>>();
+
+            foreach (var (inlineKeyboardRow, list) in from inlineKeyboardRow in inlineKeyboards
+                                                      let list = new List<InlineKeyboardButton>()
+                                                      select (inlineKeyboardRow, list))
             {
-                await _botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
-
-                var inlineKeyboard = new List<List<InlineKeyboardButton>>();
-
-                foreach (var (inlineKeyboardRow, list) in from inlineKeyboardRow in inlineKeyboards
-                                                          let list = new List<InlineKeyboardButton>()
-                                                          select (inlineKeyboardRow, list))
-                {
-                    list.AddRange(inlineKeyboardRow.Select(ik => InlineKeyboardButton.WithCallbackData(ik.DisplayToUser, ik.CallbackData)));
-                    inlineKeyboard.Add(list);
-                }
-
-                var replyMarkup = new InlineKeyboardMarkup(inlineKeyboard);
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.Choose, replyMarkup: replyMarkup);
+                list.AddRange(inlineKeyboardRow.Select(ik => InlineKeyboardButton.WithCallbackData("\U00002714 " + ik.DisplayToUser, ik.CallbackData)));
+                inlineKeyboard.Add(list);
             }
 
-            async Task SendReplyKeyboard(Message message, List<List<Keyboard>> keyboards)
+            var replyMarkup = new InlineKeyboardMarkup(inlineKeyboard);
+            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.Choose, replyMarkup: replyMarkup);
+        }
+
+        async Task SendReplyKeyboard(Message message, List<List<Keyboard>> keyboards)
+        {
+            var replyKeyboard = new List<List<KeyboardButton>>();
+
+            foreach (var (inlineKeyboardRow, list) in from replyKeyboardRow in keyboards
+                                                      let list = new List<KeyboardButton>()
+                                                      select (replyKeyboardRow, list))
             {
-                var replyKeyboard = new List<List<KeyboardButton>>();
-
-                foreach (var (inlineKeyboardRow, list) in from replyKeyboardRow in keyboards
-                                                          let list = new List<KeyboardButton>()
-                                                          select (replyKeyboardRow, list))
-                {
-                    list.AddRange(inlineKeyboardRow.Select(ik => new KeyboardButton(ik.DisplayToUser)));
-                    replyKeyboard.Add(list);
-                }
-
-                var replyKeyboardMarkup = new ReplyKeyboardMarkup(replyKeyboard, resizeKeyboard: true);
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.Choose, replyMarkup: replyKeyboardMarkup);
+                list.AddRange(inlineKeyboardRow.Select(ik => new KeyboardButton("\U0000274E " + ik.DisplayToUser)));
+                replyKeyboard.Add(list);
             }
 
-            async Task SendFile(Message message)
+            var replyKeyboardMarkup = new ReplyKeyboardMarkup(replyKeyboard, resizeKeyboard: true);
+            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.Choose, replyMarkup: replyKeyboardMarkup);
+        }
+
+        async Task SendFile(Message message)
+        {
+            await _botClient.SendChatActionAsync(message.Chat.Id, ChatAction.UploadPhoto);
+
+            const string filePath = @"Developer.jpg";
+            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var fileName = filePath.Split(Path.DirectorySeparatorChar).Last();
+
+            await _botClient.SendPhotoAsync(chatId: message.Chat.Id, photo: new InputOnlineFile(fileStream, fileName), caption: "My developer - Alex Skolnik");
+        }
+
+        async Task RequestContactAndLocation(Message message)
+        {
+            var RequestReplyKeyboard = new ReplyKeyboardMarkup(new[]
             {
-                await _botClient.SendChatActionAsync(message.Chat.Id, ChatAction.UploadPhoto);
-
-                const string filePath = @"Developer.jpg";
-                using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                var fileName = filePath.Split(Path.DirectorySeparatorChar).Last();
-
-                await _botClient.SendPhotoAsync(chatId: message.Chat.Id, photo: new InputOnlineFile(fileStream, fileName), caption: "My developer - Alex Skolnik");
-            }
-
-            async Task RequestContactAndLocation(Message message)
-            {
-                var RequestReplyKeyboard = new ReplyKeyboardMarkup(new[]
-                {
                     KeyboardButton.WithRequestLocation("Отправить свою локацию"),
                     KeyboardButton.WithRequestContact("Отправить свой контакт"),
                 });
 
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Оставьте свои данные", replyMarkup: RequestReplyKeyboard);
-            }
+            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "Оставьте свои данные", replyMarkup: RequestReplyKeyboard);
+        }
 
-            async Task Usage(Message message)
+        async Task Usage(Message message)
+        {
+            var usage = "Вот, что я могу:";
+
+            foreach (var bc in _settings.BotCommandList)
             {
-                var usage = "Вот, что я могу:";
-
-                foreach (var bc in _settings.BotCommandList)
-                {
-                    usage = $"{usage} \n {bc.Code} - {bc.Description}";
-                    break;
-                }
-
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: usage, replyMarkup: new ReplyKeyboardRemove());
+                usage = $"{usage} \n {bc.Code} - {bc.Description}";
+                break;
             }
+
+            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: usage, replyMarkup: new ReplyKeyboardRemove());
         }
 
         // Process Inline Keyboard callback data
