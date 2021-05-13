@@ -120,10 +120,16 @@
   <data name="Choose" xml:space="preserve">
     <value>Выберите один из вариантов</value>
   </data>
+  <data name="DatabaseTypeErrorMessage" xml:space="preserve">
+    <value>Данный тип баз данных пока не поддерживается</value>
+  </data>
   <data name="DoNotUnderstand" xml:space="preserve">
     <value>Извините, я вас не понял</value>
   </data>
   <data name="Inline" xml:space="preserve">
     <value>/inline</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Вот, что я могу:</value>
   </data>
 </root>

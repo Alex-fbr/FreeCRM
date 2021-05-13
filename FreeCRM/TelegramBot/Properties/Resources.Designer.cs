@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TelegramBot.Properties {
+namespace TelegramBot.Worker.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace TelegramBot.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TelegramBot.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TelegramBot.Worker.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -70,6 +70,15 @@ namespace TelegramBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Данный тип баз данных пока не поддерживается.
+        /// </summary>
+        public static string DatabaseTypeErrorMessage {
+            get {
+                return ResourceManager.GetString("DatabaseTypeErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Извините, я вас не понял.
         /// </summary>
         public static string DoNotUnderstand {
@@ -84,6 +93,15 @@ namespace TelegramBot.Properties {
         public static string Inline {
             get {
                 return ResourceManager.GetString("Inline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Вот, что я могу:.
+        /// </summary>
+        public static string Welcome {
+            get {
+                return ResourceManager.GetString("Welcome", resourceCulture);
             }
         }
     }

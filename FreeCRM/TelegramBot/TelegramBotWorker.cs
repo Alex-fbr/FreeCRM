@@ -1,7 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -10,6 +10,7 @@ using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using TelegramBot.Interfaces;
 using TelegramBot.Services;
+using TelegramBot.Worker.Interfaces;
 
 namespace TelegramBot
 {
@@ -17,20 +18,26 @@ namespace TelegramBot
     {
         private readonly ILogger<TelegramBotWorker> _logger;
         private readonly ITelegramBotClient _bot;
+        private readonly IDatabaseLogService _databaseLog;
         private readonly QueuedUpdateReceiver _updateReceiver;
-        private readonly IUpdateHandlerService _updateHandlerService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private IUpdateHandlerService _updateHandlerService;
 
-        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, ITelegramBotClient telegramBotClient)
+        public TelegramBotWorker(ILogger<TelegramBotWorker> logger, ITelegramBotClient telegramBotClient, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bot = telegramBotClient ?? throw new ArgumentNullException(nameof(telegramBotClient));
             _updateReceiver = new QueuedUpdateReceiver(_bot);
-            _updateHandlerService = new UpdateHandlerService(_logger, _bot);
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+
+            using var scope = _serviceScopeFactory.CreateScope();
+             _databaseLog = scope.ServiceProvider.GetRequiredService<IDatabaseLogService>() ?? throw new ArgumentNullException(nameof(_databaseLog));
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogDebug("StartAsync");
+            _updateHandlerService = new UpdateHandlerService(_logger, _bot);
             _updateReceiver.StartReceiving();
             return base.StartAsync(cancellationToken);
         }
@@ -56,7 +63,7 @@ namespace TelegramBot
                 {
                     try
                     {
-                        _logger.LogDebug(JsonSerializer.Serialize(update));
+                        await _databaseLog.ParseUpdateAsync(update);
                         await _updateHandlerService.GetHandler(update);
                     }
                     catch (Exception exception)

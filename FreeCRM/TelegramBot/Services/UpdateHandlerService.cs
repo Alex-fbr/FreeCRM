@@ -13,6 +13,7 @@ using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Interfaces;
+using TelegramBot.Worker.Interfaces;
 using static Common.CommandsSettingsXml;
 
 namespace TelegramBot.Services
@@ -25,8 +26,8 @@ namespace TelegramBot.Services
 
         public UpdateHandlerService(ILogger logger, ITelegramBotClient telegramBotClient)
         {
-            _logger = logger;
-            _botClient = telegramBotClient;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _botClient = telegramBotClient ?? throw new ArgumentNullException(nameof(telegramBotClient));
 
             var XMLFileName = $"{Environment.CurrentDirectory}\\settings.xml";
 
@@ -36,6 +37,10 @@ namespace TelegramBot.Services
                 using var reader = new StreamReader(XMLFileName);
                 _settings = ser.Deserialize(reader) as CommandsSettingsXml;
                 reader.Close();
+            }
+            else
+            {
+                throw new ArgumentNullException(nameof(_settings));
             }
         }
 
@@ -62,7 +67,7 @@ namespace TelegramBot.Services
 
             if (message.Type != MessageType.Text)
             {
-                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.DoNotUnderstand, replyMarkup: new ReplyKeyboardRemove());
+                await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Worker.Properties.Resources.DoNotUnderstand, replyMarkup: new ReplyKeyboardRemove());
                 await Usage(message);
                 return;
             }
@@ -107,7 +112,7 @@ namespace TelegramBot.Services
             }
 
             var replyMarkup = new InlineKeyboardMarkup(inlineKeyboard);
-            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.Choose, replyMarkup: replyMarkup);
+            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Worker.Properties.Resources.Choose, replyMarkup: replyMarkup);
         }
 
         async Task SendReplyKeyboard(Message message, List<List<Keyboard>> keyboards)
@@ -123,7 +128,7 @@ namespace TelegramBot.Services
             }
 
             var replyKeyboardMarkup = new ReplyKeyboardMarkup(replyKeyboard, resizeKeyboard: true);
-            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Properties.Resources.Choose, replyMarkup: replyKeyboardMarkup);
+            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: Worker.Properties.Resources.Choose, replyMarkup: replyKeyboardMarkup);
         }
 
         async Task SendFile(Message message)
@@ -150,7 +155,7 @@ namespace TelegramBot.Services
 
         async Task Usage(Message message)
         {
-            var usage = "Вот, что я могу:";
+            var usage = Worker.Properties.Resources.Welcome;
 
             foreach (var bc in _settings.BotCommandList)
             {
