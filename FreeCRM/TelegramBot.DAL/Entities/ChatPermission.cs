@@ -8,7 +8,7 @@ namespace TelegramBot.DAL.Entities
     public class ChatPermission
     {
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public long Id { get; set; }
 

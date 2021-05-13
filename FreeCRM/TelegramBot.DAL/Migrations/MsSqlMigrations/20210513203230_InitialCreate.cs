@@ -11,8 +11,8 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                 name: "CHATS",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -33,8 +33,8 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                 name: "USERS",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsBot = table.Column<bool>(type: "bit", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -80,8 +80,8 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                 name: "CONTACTS",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -103,8 +103,7 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                 name: "MESSAGES",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     Caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NewChatTitle = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeleteChatPhoto = table.Column<bool>(type: "bit", nullable: true),
@@ -114,7 +113,6 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                     MigrateToChatId = table.Column<long>(type: "bigint", nullable: true),
                     MigrateFromChatId = table.Column<long>(type: "bigint", nullable: true),
                     ConnectedWebsite = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MessageId = table.Column<int>(type: "int", nullable: false),
                     FromUserId = table.Column<int>(type: "int", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ForwardFromMessageId = table.Column<int>(type: "int", nullable: false),

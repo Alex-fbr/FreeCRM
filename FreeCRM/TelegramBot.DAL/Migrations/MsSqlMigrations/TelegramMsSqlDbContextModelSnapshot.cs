@@ -22,12 +22,13 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
             modelBuilder.Entity("TelegramBot.DAL.Entities.Chat", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("bigint");
 
                     b.Property<bool?>("CanSetStickerSet")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -110,9 +111,10 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
             modelBuilder.Entity("TelegramBot.DAL.Entities.Contact", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -146,9 +148,7 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
             modelBuilder.Entity("TelegramBot.DAL.Entities.Message", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("bigint");
 
                     b.Property<string>("AuthorSignature")
                         .HasColumnType("nvarchar(max)");
@@ -195,9 +195,6 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                     b.Property<string>("MediaGroupId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MessageId")
-                        .HasColumnType("int");
-
                     b.Property<long?>("MigrateFromChatId")
                         .HasColumnType("bigint");
 
@@ -230,15 +227,16 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
             modelBuilder.Entity("TelegramBot.DAL.Entities.User", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("bigint");
 
                     b.Property<bool?>("CanJoinGroups")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("CanReadAllGroupMessages")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("FirstName")
                         .IsRequired()

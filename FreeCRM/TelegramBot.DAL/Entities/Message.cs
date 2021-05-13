@@ -30,9 +30,6 @@ namespace TelegramBot.DAL.Entities
 
         public string ConnectedWebsite { get; set; }
 
-        [Required]
-        public int MessageId { get; set; }
-
         public int FromUserId { get; set; }
 
         [Required]
