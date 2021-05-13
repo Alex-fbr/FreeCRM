@@ -1,2 +1,2 @@
 # FreeCRM
-Free Customer Relationship Management
+Телеграм бот и веб-админка для него
