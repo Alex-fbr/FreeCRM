@@ -15,7 +15,6 @@ namespace TelegramBot.Worker.Services
     public class DatabaseLogService : IDatabaseLogService
     {
         private readonly ILogger _logger;
-        private readonly TelegramBaseDbContext _dbContext;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public DatabaseLogService(ILoggerFactory logger, ITelegramBaseDbContext dbContext, IServiceScopeFactory serviceScopeFactory)
@@ -96,6 +95,7 @@ namespace TelegramBot.Worker.Services
             await DatabaseAction.TryDatabaseAction(AddOrUpdateUser(dbContext, message.From), _logger, "Ошибка при работе с пользователем");
             await DatabaseAction.TryDatabaseAction(AddOrUpdateChat(dbContext, message.Chat), _logger, "Ошибка при работе с чатом");
             await DatabaseAction.TryDatabaseAction(AddOrUpdateMessage(dbContext, message), _logger, "Ошибка при работе с чатом");
+            await dbContext.SaveChangesAsync();
         }
 
         private async Task AddOrUpdateUser(TelegramBaseDbContext dbContext, User user)
@@ -130,14 +130,12 @@ namespace TelegramBot.Worker.Services
                 dbUser.SupportsInlineQueries = user.SupportsInlineQueries;
                 dbContext.Users.Update(dbUser);
             }
-
-            await dbContext.SaveChangesAsync();
         }
 
         private async Task AddOrUpdateChat(TelegramBaseDbContext dbContext, Chat chat)
         {
-            var dbChat = dbContext.Chats.FirstOrDefault(x => x.Id == chat.Id);
-            var dbChatPermission = dbContext.ChatPermissions.FirstOrDefault(x => x.ChatId == chat.Id);
+            var dbChat = await dbContext.Chats.FirstOrDefaultAsync(x => x.Id == chat.Id);
+            var dbChatPermission = await dbContext.ChatPermissions.FirstOrDefaultAsync(x => x.ChatId == chat.Id);
 
             if (dbChat == null)
             {
@@ -200,13 +198,11 @@ namespace TelegramBot.Worker.Services
                 dbChatPermission.CanSendPolls = chat.Permissions?.CanSendPolls;
                 dbContext.ChatPermissions.Update(dbChatPermission);
             }
-
-            await dbContext.SaveChangesAsync();
         }
 
         private async Task AddOrUpdateMessage(TelegramBaseDbContext dbContext, Message message)
         {
-            var dbMessage = dbContext.Messages.FirstOrDefault(x => x.Id == message.MessageId);
+            var dbMessage = await dbContext.Messages.FirstOrDefaultAsync(x => x.Id == message.MessageId);
 
             dbContext.Messages.Add(new DAL.Entities.Message()
             {
@@ -233,10 +229,6 @@ namespace TelegramBot.Worker.Services
                 Text = message.Text,
                 UserId = message.From.Id
             });
-
-            await dbContext.SaveChangesAsync();
         }
-
-
     }
 }
