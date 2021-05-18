@@ -10,7 +10,7 @@ using TelegramBot.DAL.Contexts;
 namespace TelegramBot.DAL.Migrations.MsSqlMigrations
 {
     [DbContext(typeof(TelegramMsSqlDbContext))]
-    [Migration("20210513203230_InitialCreate")]
+    [Migration("20210517140100_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -210,7 +210,11 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Text")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");

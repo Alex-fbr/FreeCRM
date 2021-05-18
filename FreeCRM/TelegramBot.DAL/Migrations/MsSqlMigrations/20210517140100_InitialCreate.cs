@@ -122,7 +122,8 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                     EditDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     MediaGroupId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AuthorSignature = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     ChatId = table.Column<long>(type: "bigint", nullable: false)
                 },

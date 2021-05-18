@@ -2,10 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramBot.DAL.Contexts;
 using TelegramBot.DAL.Extensions;
 using TelegramBot.Worker.Interfaces;
@@ -29,47 +29,40 @@ namespace TelegramBot.Worker.Services
             {
                 switch (update.Type)
                 {
-                    case Telegram.Bot.Types.Enums.UpdateType.Message:
-                        await LogMessage(update.Message);
+                    case UpdateType.Message:
+                    case UpdateType.EditedMessage:
+                    case UpdateType.ChannelPost:
+                    case UpdateType.EditedChannelPost:
+                        await LogMessage(update);
                         break;
 
-                    case Telegram.Bot.Types.Enums.UpdateType.EditedMessage:
-                        await LogMessage(update.EditedMessage);
-                        break;
-
-                    case Telegram.Bot.Types.Enums.UpdateType.ChannelPost:
-                        await LogMessage(update.ChannelPost);
-                        break;
-
-                    case Telegram.Bot.Types.Enums.UpdateType.EditedChannelPost:
-                        await LogMessage(update.EditedChannelPost);
-                        break;
-
-                    case Telegram.Bot.Types.Enums.UpdateType.InlineQuery:
+                    case UpdateType.InlineQuery:
                         _logger.LogWarning($"InlineQuery: {JsonSerializer.Serialize(update.InlineQuery)}");
+                        await LogInlineQuery(update);
                         break;
 
-                    case Telegram.Bot.Types.Enums.UpdateType.ChosenInlineResult:
+                    case UpdateType.ChosenInlineResult:
                         _logger.LogWarning($"ChosenInlineResult: {JsonSerializer.Serialize(update.ChosenInlineResult)}");
                         break;
 
-                    case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
+                    case UpdateType.CallbackQuery:
                         _logger.LogWarning($"CallbackQuery: {JsonSerializer.Serialize(update.CallbackQuery)}");
+                        await LogCallbackQueryQuery(update);
                         break;
 
-                    case Telegram.Bot.Types.Enums.UpdateType.ShippingQuery:
+                    case UpdateType.ShippingQuery:
                         _logger.LogWarning($"ShippingQuery: {JsonSerializer.Serialize(update.ShippingQuery)}");
                         break;
 
-                    case Telegram.Bot.Types.Enums.UpdateType.PreCheckoutQuery:
+                    case UpdateType.PreCheckoutQuery:
                         _logger.LogWarning($"PreCheckoutQuery: {JsonSerializer.Serialize(update.PreCheckoutQuery)}");
                         break;
 
-                    case Telegram.Bot.Types.Enums.UpdateType.Poll:
+                    case UpdateType.Poll:
                         _logger.LogWarning($"Poll: {JsonSerializer.Serialize(update.Poll)}");
                         break;
 
-                    case Telegram.Bot.Types.Enums.UpdateType.PollAnswer:
+                    case UpdateType.PollAnswer:
                         _logger.LogWarning($"PollAnswer: {JsonSerializer.Serialize(update.PollAnswer)}");
                         break;
 
@@ -85,16 +78,40 @@ namespace TelegramBot.Worker.Services
 
         }
 
-        private async Task LogMessage(Message message)
+        private async Task LogCallbackQueryQuery(Update update)
         {
-            _logger.LogDebug($"Message: {JsonSerializer.Serialize(message)}");
+            _logger.LogDebug($"InlineQuery: {JsonSerializer.Serialize(update)}");
+            using var scope = _serviceScopeFactory.CreateScope();
+            var dbContext = (TelegramBaseDbContext)scope.ServiceProvider.GetService<ITelegramBaseDbContext>();
+
+            await DatabaseAction.TryDatabaseAction(AddCallbackQuery(dbContext, update, update.Id), _logger, "Ошибка при работе с сообщением");
+            await dbContext.SaveChangesAsync();
+        }
+
+        private async Task LogInlineQuery(Update update)
+        {
+            _logger.LogDebug($"InlineQuery: {JsonSerializer.Serialize(update.InlineQuery)}");
+            using var scope = _serviceScopeFactory.CreateScope();
+            var dbContext = (TelegramBaseDbContext)scope.ServiceProvider.GetService<ITelegramBaseDbContext>();
+
+            await DatabaseAction.TryDatabaseAction(AddInlineQuery(dbContext, update, update.Id), _logger, "Ошибка при работе с сообщением");
+            await dbContext.SaveChangesAsync();
+        }
+
+        private async Task LogMessage(Update update)
+        {
+            _logger.LogDebug($"Message: {JsonSerializer.Serialize(update)}");
 
             using var scope = _serviceScopeFactory.CreateScope();
             var dbContext = (TelegramBaseDbContext)scope.ServiceProvider.GetService<ITelegramBaseDbContext>();
 
-            await DatabaseAction.TryDatabaseAction(AddOrUpdateUser(dbContext, message.From), _logger, "Ошибка при работе с пользователем");
-            await DatabaseAction.TryDatabaseAction(AddOrUpdateChat(dbContext, message.Chat), _logger, "Ошибка при работе с чатом");
-            await DatabaseAction.TryDatabaseAction(AddOrUpdateMessage(dbContext, message), _logger, "Ошибка при работе с чатом");
+            if (update.Type == UpdateType.Message)
+            {
+                await DatabaseAction.TryDatabaseAction(AddOrUpdateUser(dbContext, update.Message.From), _logger, "Ошибка при работе с пользователем");
+                await DatabaseAction.TryDatabaseAction(AddOrUpdateChat(dbContext, update.Message.Chat), _logger, "Ошибка при работе с чатом");
+            }
+
+            await DatabaseAction.TryDatabaseAction(AddMessage(dbContext, update.Message, update.Type), _logger, "Ошибка при работе с сообщением");
             await dbContext.SaveChangesAsync();
         }
 
@@ -200,11 +217,9 @@ namespace TelegramBot.Worker.Services
             }
         }
 
-        private async Task AddOrUpdateMessage(TelegramBaseDbContext dbContext, Message message)
+        private async Task AddMessage(TelegramBaseDbContext dbContext, Message message, UpdateType type)
         {
-            var dbMessage = await dbContext.Messages.FirstOrDefaultAsync(x => x.Id == message.MessageId);
-
-            dbContext.Messages.Add(new DAL.Entities.Message()
+            await dbContext.Messages.AddAsync(new DAL.Entities.Message()
             {
                 Id = message.MessageId,
                 AuthorSignature = message.AuthorSignature,
@@ -227,8 +242,45 @@ namespace TelegramBot.Worker.Services
                 NewChatTitle = message.NewChatTitle,
                 SupergroupChatCreated = message.SupergroupChatCreated,
                 Text = message.Text,
+                Type = (int)type,
                 UserId = message.From.Id
             });
+        }
+
+        private async Task AddInlineQuery(TelegramBaseDbContext dbContext, Update update, int id)
+        {
+            //await dbContext.Messages.AddAsync(new DAL.Entities.Message()
+            //{
+            //    Id = id,
+            //    AuthorSignature = update.InlineQuery.AuthorSignature,
+            //    Caption = update.InlineQuery.Caption,
+            //    ChannelChatCreated = update.InlineQuery.ChannelChatCreated,
+            //    ChatId = update.InlineQuery.Chat.Id,
+            //    ConnectedWebsite = update.InlineQuery.ConnectedWebsite,
+            //    Date = update.InlineQuery.Date,
+            //    DeleteChatPhoto = update.InlineQuery.DeleteChatPhoto,
+            //    EditDate = update.InlineQuery.EditDate,
+            //    ForwardDate = update.InlineQuery.ForwardDate,
+            //    ForwardFromMessageId = update.InlineQuery.ForwardFromMessageId,
+            //    ForwardSenderName = update.InlineQuery.ForwardSenderName,
+            //    ForwardSignature = update.InlineQuery.ForwardSignature,
+            //    FromUserId = update.InlineQuery.From.Id,
+            //    GroupChatCreated = update.InlineQuery.GroupChatCreated,
+            //    MediaGroupId = update.InlineQuery.MediaGroupId,
+            //    MigrateFromChatId = update.InlineQuery.MigrateFromChatId,
+            //    MigrateToChatId = update.InlineQuery.MigrateToChatId,
+            //    NewChatTitle = update.InlineQuery.NewChatTitle,
+            //    SupergroupChatCreated = update.InlineQuery.SupergroupChatCreated,
+            //    Text = update.InlineQuery.Query,
+            //    Type = (int)update.Type,
+            //    UserId = update.InlineQuery.From.Id
+            //});
+        }
+
+        private async Task AddCallbackQuery(TelegramBaseDbContext dbContext, Update update, int id)
+        {
+           // var dbMessage = await dbContext.Messages.FirstOrDefaultAsync(x => x.Id == callbackQuery.From.Id);
+
         }
     }
 }

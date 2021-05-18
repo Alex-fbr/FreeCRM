@@ -12,6 +12,11 @@ namespace TelegramBot.DAL.Entities
         [Key]
         public long Id { get; set; }
 
+        /// <summary>
+        /// Id предыдущего сообщения
+        /// </summary>
+        public long? PreviousMessageId { get; set; }
+
         public string Caption { get; set; }
 
         public string NewChatTitle { get; set; }
@@ -49,9 +54,11 @@ namespace TelegramBot.DAL.Entities
 
         public string AuthorSignature { get; set; }
 
+        [Required]
         public string Text { get; set; }
 
-        public int Type { get; }
+        [Required]
+        public int Type { get; set; }
 
         [Required]
         [ForeignKey("User")]

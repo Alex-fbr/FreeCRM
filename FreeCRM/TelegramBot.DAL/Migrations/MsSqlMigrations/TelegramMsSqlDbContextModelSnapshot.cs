@@ -208,7 +208,11 @@ namespace TelegramBot.DAL.Migrations.MsSqlMigrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Text")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
