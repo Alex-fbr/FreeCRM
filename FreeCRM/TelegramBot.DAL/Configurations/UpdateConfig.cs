@@ -5,9 +5,9 @@ using TelegramBot.DAL.Entities;
 
 namespace TelegramBot.DAL.Configurations
 {
-    internal class ChatConfig : IEntityTypeConfiguration<Chat>
+    internal class UpdateConfig : IEntityTypeConfiguration<Update>
     {
-        public void Configure(EntityTypeBuilder<Chat> builder)
+        public void Configure(EntityTypeBuilder<Update> builder)
         {
             if (builder == null)
             {
@@ -15,6 +15,11 @@ namespace TelegramBot.DAL.Configurations
             }
 
             builder.HasIndex(c => c.Id);
+
+            // Один Chat ко многим Messages
+            builder.HasOne(o => o.Message)
+                   .WithOne(c => c.Update)
+                   .HasForeignKey<Update>(b => b.MessageId);
         }
     }
 }

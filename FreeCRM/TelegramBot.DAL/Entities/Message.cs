@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TelegramBot.DAL.Entities
 {
-    [Table("MESSAGES")]
     public class Message
     {
         [Required]
@@ -35,12 +34,12 @@ namespace TelegramBot.DAL.Entities
 
         public string ConnectedWebsite { get; set; }
 
-        public int FromUserId { get; set; }
+        public long FromUserId { get; set; }
 
         [Required]
         public DateTime Date { get; set; }
 
-        public int ForwardFromMessageId { get; set; }
+        public int? ForwardFromMessageId { get; set; }
 
         public string ForwardSignature { get; set; }
 
@@ -69,5 +68,7 @@ namespace TelegramBot.DAL.Entities
         [ForeignKey("Chat")]
         public long ChatId { get; set; }
         public Chat Chat { get; set; }
+
+        public Update Update { get; set; }
     }
 }

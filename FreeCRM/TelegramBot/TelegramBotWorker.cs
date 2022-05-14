@@ -1,24 +1,26 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
-using TelegramBot.Interfaces;
-using TelegramBot.Services;
-using TelegramBot.Worker.Interfaces;
 
-namespace TelegramBot
+using TelegramBot.Worker.Interfaces;
+using TelegramBot.Worker.Services;
+
+namespace TelegramBot.Worker
 {
     public class TelegramBotWorker : BackgroundService
     {
         private readonly ILogger<TelegramBotWorker> _logger;
         private readonly ITelegramBotClient _bot;
-        private readonly IDatabaseLogService _databaseLog;
+        private readonly IRepositoryService _databaseLog;
         private readonly QueuedUpdateReceiver _updateReceiver;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private IUpdateHandlerService _updateHandlerService;
@@ -31,23 +33,21 @@ namespace TelegramBot
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
 
             using var scope = _serviceScopeFactory.CreateScope();
-             _databaseLog = scope.ServiceProvider.GetRequiredService<IDatabaseLogService>() ?? throw new ArgumentNullException(nameof(_databaseLog));
+            _databaseLog = scope.ServiceProvider.GetRequiredService<IRepositoryService>() ?? throw new ArgumentNullException(nameof(_databaseLog));
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogDebug("StartAsync");
             _updateHandlerService = new UpdateHandlerService(_logger, _bot);
-            _updateReceiver.StartReceiving();
+            _updateReceiver.WithCancellation(cancellationToken: cancellationToken);
             return base.StartAsync(cancellationToken);
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Worker stopping at: {time}", DateTimeOffset.Now);
-
-            _updateReceiver.StopReceiving();
-
+            _updateReceiver.WithCancellation(cancellationToken);
             return base.StopAsync(cancellationToken);
         }
 
@@ -59,7 +59,7 @@ namespace TelegramBot
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-                await foreach (Update update in _updateReceiver.YieldUpdatesAsync())
+                await foreach (Update update in _updateReceiver.WithCancellation(stoppingToken))
                 {
                     try
                     {

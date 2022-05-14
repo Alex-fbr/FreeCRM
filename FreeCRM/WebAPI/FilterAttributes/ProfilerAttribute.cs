@@ -17,10 +17,11 @@ namespace WebAPI.FilterAttributes
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var timer = Stopwatch.StartNew();
+
             await next();
 
             timer.Stop();
-            _logger.LogDebug($"Elapsed time: '{timer.Elapsed.TotalMilliseconds}' ms.");
+            _logger.LogDebug($"The action '{context.ActionDescriptor.DisplayName}' took '{timer.Elapsed.TotalMilliseconds}' ms.");
         }
     }
 }

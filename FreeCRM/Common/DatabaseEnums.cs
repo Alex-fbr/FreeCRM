@@ -5,7 +5,9 @@
         public enum DatabaseTypes
         {
             MsSql,
-            Postgres
+            Postgres,
+            MySQL,
+            Oracle
         }
     }
 }

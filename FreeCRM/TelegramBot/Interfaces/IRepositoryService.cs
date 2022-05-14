@@ -1,11 +1,10 @@
 ﻿using System.Threading.Tasks;
-
 using Telegram.Bot.Types;
 
 namespace TelegramBot.Worker.Interfaces
 {
-    public interface IUpdateHandlerService
+    public interface IRepositoryService
     {
-        Task GetHandler(Update update);
+        Task ParseUpdateAsync(Update update);
     }
 }

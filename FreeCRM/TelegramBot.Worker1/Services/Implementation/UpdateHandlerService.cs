@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 using Common;
-
-using Microsoft.Extensions.Logging;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -16,21 +9,19 @@ using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
-using TelegramBot.Worker.Interfaces;
-
 using static Common.CommandsSettingsXml;
 
-namespace TelegramBot.Worker.Services
+namespace TelegramBot.Worker.Services.Implementation
 {
     public class UpdateHandlerService : IUpdateHandlerService
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<UpdateHandlerService> _logger;
         private readonly ITelegramBotClient _botClient;
-        private readonly CommandsSettingsXml _settings;
+        private readonly CommandsSettingsXml? _settings;
 
-        public UpdateHandlerService(ILogger logger, ITelegramBotClient telegramBotClient)
+        public UpdateHandlerService(ILoggerFactory logger, ITelegramBotClient telegramBotClient)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger.CreateLogger<UpdateHandlerService>() ?? throw new ArgumentNullException(nameof(logger));
             _botClient = telegramBotClient ?? throw new ArgumentNullException(nameof(telegramBotClient));
 
             var XMLFileName = $"{Environment.CurrentDirectory}\\settings.xml";
@@ -65,7 +56,7 @@ namespace TelegramBot.Worker.Services
             _ => UnknownUpdateHandlerAsync(update)
         };
 
-        private async Task BotOnMessageReceived(Message message)
+        private async Task BotOnMessageReceived(Message? message)
         {
             _logger.LogDebug($"Receive message type: {message.Type}");
 

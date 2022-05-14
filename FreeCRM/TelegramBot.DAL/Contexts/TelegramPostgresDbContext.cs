@@ -12,7 +12,7 @@ namespace TelegramBot.DAL.Contexts
         {
             base.OnModelCreating(modelBuilder);
 
-           // modelBuilder.ApplyConfiguration(new OffersPostgresConfiguration());
+            modelBuilder.HasDefaultSchema("public");
         }
     }
 }

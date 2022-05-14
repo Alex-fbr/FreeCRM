@@ -1,11 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+<Project Sdk="Microsoft.NET.Sdk.Worker">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
-		<LangVersion>9.0</LangVersion>
-		<UserSecretsId>dotnet-TelegramBot-C9799061-1B16-481C-A5F0-88BA1F7AC12B</UserSecretsId>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>dotnet-TelegramBot.Worker1-37A24FC8-D5A4-4CC4-92ED-8DFA81D907C6</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	</PropertyGroup>
+
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.5" />
@@ -33,36 +35,33 @@
 		<PackageReference Include="Telegram.Bot.Extensions.Polling" Version="1.0.2" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="Models\" />
-	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Common\Common.csproj" />
-		<ProjectReference Include="..\TelegramBot.DAL\TelegramBot.DAL.csproj" />
+	  <ProjectReference Include="..\Common\Common.csproj" />
+	  <ProjectReference Include="..\TelegramBot.DAL\TelegramBot.DAL.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Compile Update="Properties\Resources.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Resources.resx</DependentUpon>
-		</Compile>
-	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Update="Properties\Resources.resx">
-			<Generator>PublicResXFileCodeGenerator</Generator>
-			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DependentUpon>Resources.resx</DependentUpon>
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	  </Compile>
 	</ItemGroup>
 
+
 	<ItemGroup>
-		<None Update="Developer.jpg">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="settings.xml">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Update="settings.xml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 </Project>

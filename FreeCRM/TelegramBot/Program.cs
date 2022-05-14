@@ -1,18 +1,22 @@
 using Common;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using Serilog;
+
 using System;
+
 using Telegram.Bot;
-using TelegramBot.Configurations;
+
 using TelegramBot.DAL.Contexts;
 using TelegramBot.Worker.Configurations;
 using TelegramBot.Worker.Interfaces;
 using TelegramBot.Worker.Services;
 
-namespace TelegramBot
+namespace TelegramBot.Worker
 {
     public class Program
     {
@@ -36,7 +40,7 @@ namespace TelegramBot
                         return new TelegramBotClient(botConfig.Token);
                     });
 
-                    services.AddScoped<IDatabaseLogService, DatabaseLogService>();
+                    services.AddScoped<IRepositoryService, RepositoryService>();
                     services.AddHostedService<TelegramBotWorker>();
                 })
                 .UseSerilog();
@@ -49,15 +53,6 @@ namespace TelegramBot
 
             switch (dbConfig.DatabaseType)
             {
-                case DatabaseEnums.DatabaseTypes.MsSql:
-                    services.AddDbContext<TelegramMsSqlDbContext>(builder =>
-                    {
-                        builder.UseSqlServer(connectionString);
-                    });
-
-                    services.AddScoped<ITelegramBaseDbContext, TelegramMsSqlDbContext>();
-                    break;
-
                 case DatabaseEnums.DatabaseTypes.Postgres:
                     services.AddDbContext<TelegramPostgresDbContext>(builder =>
                     {
@@ -68,7 +63,7 @@ namespace TelegramBot
                     break;
 
                 default:
-                    throw new InvalidOperationException(Worker.Properties.Resources.DatabaseTypeErrorMessage);
+                    throw new InvalidOperationException(Properties.Resources.DatabaseTypeErrorMessage);
             }
         }
     }

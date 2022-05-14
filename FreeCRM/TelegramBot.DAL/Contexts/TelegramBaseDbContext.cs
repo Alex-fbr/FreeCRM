@@ -8,6 +8,7 @@ namespace TelegramBot.DAL.Contexts
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Contact> Contacts { get; set; }
+        public DbSet<Update> Updates { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<ChatPermission> ChatPermissions { get; set; }
@@ -25,6 +26,7 @@ namespace TelegramBot.DAL.Contexts
             modelBuilder.ApplyConfiguration(new UserConfig());
             modelBuilder.ApplyConfiguration(new ContactConfig());
             modelBuilder.ApplyConfiguration(new MessageConfig());
+            modelBuilder.ApplyConfiguration(new UpdateConfig());
         }
     }
 }

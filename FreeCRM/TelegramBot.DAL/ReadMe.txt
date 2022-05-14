@@ -1,5 +1,2 @@
-﻿
-Add-Migration InitialCreate -Context TelegramMsSqlDbContext -OutputDir Migrations\MsSqlMigrations
-Add-Migration InitialCreate -Context TelegramPostgresDbContext -OutputDir Migrations\PostgresMigrations
-
- Update-Database -Context TelegramMsSqlDbContext
+﻿Add-Migration InitialCreate -Context TelegramPostgresDbContext -OutputDir Migrations\Postgres
+Update-Database -Context TelegramPostgresDbContext

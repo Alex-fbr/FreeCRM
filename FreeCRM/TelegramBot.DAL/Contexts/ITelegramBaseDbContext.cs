@@ -8,6 +8,7 @@ namespace TelegramBot.DAL.Contexts
         DbSet<User> Users { get; set; }
         DbSet<Contact> Contacts { get; set; }
         DbSet<Message> Messages { get; set; }
+        DbSet<Update> Updates { get; set; }
         DbSet<Chat> Chats { get; set; }
         DbSet<ChatPermission> ChatPermissions { get; set; }
     }

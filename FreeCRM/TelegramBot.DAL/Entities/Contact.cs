@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TelegramBot.DAL.Entities
 {
-    [Table("CONTACTS")]
     public class Contact
     {
         [Required]
